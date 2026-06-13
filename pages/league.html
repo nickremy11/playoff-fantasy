@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Playoff Fantasy — League</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Playfair+Display:ital,wght@0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+/* ── CSS Variables & Base ── */
+:root {
+  --cream: #f5ead6; --parchment: #e8d5b0; --brown-dark: #2a1a0e;
+  --brown-mid: #5c3d1e; --brown-light: #8b5e2e; --green: #2d4a1e;
+  --green-light: #4a7a2f; --red: #8b1a1a; --gold: #c9962a;
+  --gold-light: #e8b84b; --ink: #1a1008;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--cream); color: var(--ink);
+  font-family: 'Crimson Text', Georgia, serif; min-height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9962a' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
+}
+.page-wrap { position: relative; z-index: 1; }
+
+/* ── Banner ── */
+.banner { background: var(--green); border-bottom: 6px double var(--gold); position: relative; overflow: hidden; }
+.banner::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px); }
+.banner-inner { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 20px 28px 16px; display: flex; align-items: center; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
+.banner-left { display: flex; flex-direction: column; }
+.banner-back { font-family: 'Rye', serif; font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-light); text-decoration: none; opacity: 0.7; margin-bottom: 4px; }
+.banner-back:hover { opacity: 1; }
+.banner h1 { font-family: 'Rye', serif; font-size: clamp(1rem, 2.5vw, 1.6rem); color: var(--cream); text-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+.banner h1 span { color: var(--gold-light); }
+.banner-sub { font-family: 'Crimson Text', serif; font-style: italic; font-size: 0.88rem; color: var(--parchment); opacity: 0.8; margin-top: 2px; }
+
+/* ── Main layout ── */
+.main { max-width: 1400px; margin: 0 auto; padding: 20px 20px 80px; }
+
+/* ── Top tabs ── */
+.top-tabs { display: flex; border-bottom: 3px solid var(--brown-mid); margin-bottom: 20px; }
+.top-tab { background: none; border: none; border-bottom: 4px solid transparent; margin-bottom: -3px; font-family: 'Rye', serif; font-size: 0.6rem; letter-spacing: 0.2em; color: var(--brown-light); padding: 10px 22px; cursor: pointer; transition: color 0.15s; }
+.top-tab.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+/* ── Room header ── */
+.room-header { background: var(--brown-dark); border: 2px solid var(--gold); border-radius: 2px; padding: 14px 20px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.room-status { font-family: 'Rye', serif; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--gold-light); }
+.room-clock { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; color: var(--cream); margin-top: 2px; }
+.room-clock.my-turn { color: var(--gold-light); animation: pulse-glow 1.5s ease-in-out infinite; }
+@keyframes pulse-glow { 0%,100%{opacity:1}50%{opacity:0.6} }
+.room-progress { font-family: 'Crimson Text', serif; font-size: 0.85rem; color: var(--brown-light); font-style: italic; margin-top: 2px; }
+.room-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { background: var(--green); border: 2px solid var(--gold); color: var(--gold-light); font-family: 'Rye', serif; font-size: 0.52rem; letter-spacing: 0.15em; padding: 6px 16px; cursor: pointer; border-radius: 2px; transition: background 0.2s; white-space: nowrap; min-height: 32px; }
+.btn:hover { background: var(--gold); color: var(--brown-dark); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: transparent; border-color: var(--brown-mid); color: var(--brown-light); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
+.btn-danger { background: var(--red); border-color: #a02020; color: var(--cream); }
+.btn-danger:hover { background: #a02020; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'Rye', serif; font-size: 0.46rem; letter-spacing: 0.1em; }
+.badge-green { background: var(--green); color: var(--gold-light); border: 1px solid var(--gold); }
+.badge-gold  { background: var(--gold); color: var(--brown-dark); }
+
+/* ── Two-column draft layout ── */
+.two-col { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
+@media(max-width:960px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── Left panel (player pool) ── */
+.panel-left { position: sticky; top: 0; }
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+.pos-pill { background: none; border: 1px solid var(--brown-mid); color: var(--brown-light); font-family: 'Rye', serif; font-size: 0.46rem; letter-spacing: 0.12em; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+.pos-pill.active { background: var(--brown-dark); border-color: var(--gold); color: var(--gold-light); }
+.sort-select { background: rgba(255,255,255,0.06); border: 1px solid var(--brown-mid); color: var(--parchment); font-family: 'Crimson Text', serif; font-size: 0.85rem; padding: 4px 8px; border-radius: 2px; outline: none; cursor: pointer; }
+.pool-search { background: rgba(255,255,255,0.06); border: 1px solid var(--brown-mid); color: var(--cream); font-family: 'Crimson Text', serif; font-size: 0.9rem; padding: 5px 10px; border-radius: 2px; outline: none; flex: 1; min-width: 100px; }
+.pool-search::placeholder { color: rgba(255,255,255,0.3); font-style: italic; }
+.pool-search:focus { border-color: var(--gold); }
+.show-drafted { display: flex; align-items: center; gap: 5px; margin-left: auto; font-family: 'Crimson Text', serif; font-size: 0.82rem; color: var(--brown-light); cursor: pointer; white-space: nowrap; }
+.show-drafted input { accent-color: var(--gold); }
+.pool-wrap { background: var(--brown-dark); border: 1px solid var(--brown-mid); border-radius: 2px; overflow: hidden; max-height: calc(100vh - 220px); overflow-y: auto; }
+.pool-table { width: 100%; border-collapse: collapse; }
+.pool-table th { font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.1em; color: var(--gold); padding: 7px 8px; text-align: left; border-bottom: 2px solid var(--brown-mid); position: sticky; top: 0; background: var(--brown-dark); z-index: 10; white-space: nowrap; }
+.pool-table th.r { text-align: right; }
+.pool-row { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; }
+.pool-row:hover { background: rgba(255,255,255,0.04); }
+.pool-row.drafted { opacity: 0.3; }
+.pool-row.drafted td { text-decoration: line-through; color: var(--brown-light); }
+.pool-row.ineligible { opacity: 0.45; }
+.pool-row td { padding: 6px 8px; font-family: 'Crimson Text', serif; font-size: 0.88rem; color: var(--parchment); }
+.pool-row td.r { text-align: right; }
+.p-name { color: var(--cream); font-weight: 600; }
+.pos-tag { display: inline-block; font-family: 'Rye', serif; font-size: 0.36rem; letter-spacing: 0.08em; padding: 2px 5px; border-radius: 2px; margin-right: 3px; }
+.pos-QB { background: #3a0a0a; color: #e05252; }
+.pos-RB { background: #1a3a1a; color: #5cb85c; }
+.pos-WR { background: #0d2a36; color: #5bc0de; }
+.pos-TE { background: #3a1a0a; color: #e8734b; }
+.pick-btn { background: var(--green); border: 1px solid var(--gold); color: var(--gold-light); font-family: 'Rye', serif; font-size: 0.38rem; letter-spacing: 0.1em; padding: 3px 9px; cursor: pointer; border-radius: 2px; white-space: nowrap; }
+.pick-btn:hover { background: var(--gold); color: var(--brown-dark); }
+.pick-btn:disabled { opacity: 0.3; cursor: not-allowed; background: var(--green); color: var(--gold-light); }
+.drafted-by { font-family: 'Crimson Text', serif; font-size: 0.75rem; color: var(--brown-light); font-style: italic; white-space: nowrap; }
+.nfl-team { font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.08em; color: var(--brown-light); }
+
+/* My constraints bar */
+.constraints { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.con-pill { display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.3); border: 1px solid var(--brown-mid); border-radius: 2px; padding: 3px 8px; font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.1em; color: var(--parchment); }
+.con-pill.full { border-color: var(--red); color: #e05252; }
+.con-pill .pos-label { opacity: 0.7; margin-right: 3px; }
+
+/* ── Right panel ── */
+.panel-right {}
+.panel-tabs { display: flex; border-bottom: 2px solid var(--brown-mid); margin-bottom: 14px; }
+.panel-tab { background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: 'Rye', serif; font-size: 0.52rem; letter-spacing: 0.15em; color: var(--brown-light); padding: 9px 16px; cursor: pointer; }
+.panel-tab.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+/* ── Draft grid ── */
+.draft-grid-scroll { overflow-x: auto; background: var(--brown-dark); border: 1px solid var(--brown-mid); border-radius: 2px; padding: 10px; }
+.draft-grid-table { display: grid; gap: 3px; }
+.grid-th { font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.1em; color: var(--gold); padding: 5px 4px; text-align: center; border-bottom: 1px solid var(--brown-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-th.my-col { color: var(--gold-light); background: rgba(201,150,42,0.08); }
+.grid-round-lbl { font-family: 'Rye', serif; font-size: 0.4rem; letter-spacing: 0.12em; color: var(--gold); padding: 5px 4px; display: flex; align-items: center; }
+.grid-cell { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 2px; padding: 4px 6px; min-height: 40px; display: flex; align-items: center; font-family: 'Crimson Text', serif; font-size: 0.78rem; color: var(--parchment); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
+.grid-cell.alt-col { background: rgba(255,255,255,0.05); }
+.grid-cell.my-col { background: rgba(201,150,42,0.06); }
+.grid-cell.filled { background: rgba(44,80,30,0.25); border-color: rgba(74,122,47,0.3); }
+.grid-cell.on-clock { background: rgba(201,150,42,0.15); border-color: var(--gold); animation: pulse-border 1.5s ease-in-out infinite; font-family: 'Rye', serif; font-size: 0.4rem; letter-spacing: 0.08em; color: var(--gold-light); justify-content: center; text-align: center; }
+@keyframes pulse-border { 0%,100%{border-color:var(--gold)}50%{border-color:rgba(201,150,42,0.3)} }
+.grid-cell.future { opacity: 0.25; }
+.grid-pos { font-family: 'Rye', serif; font-size: 0.34rem; opacity: 0.7; margin-right: 3px; }
+
+/* ── Rosters panel ── */
+.rosters-wrap { display: grid; gap: 12px; }
+.roster-card { background: var(--brown-dark); border: 1px solid var(--brown-mid); border-radius: 2px; overflow: hidden; }
+.rc-head { padding: 9px 14px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--brown-mid); display: flex; align-items: center; gap: 10px; }
+.rc-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95rem; color: var(--cream); flex: 1; }
+.rc-count { font-family: 'Rye', serif; font-size: 0.46rem; letter-spacing: 0.1em; color: var(--gold); }
+.rc-player { display: flex; align-items: center; gap: 8px; padding: 5px 14px; border-bottom: 1px dashed rgba(255,255,255,0.04); }
+.rc-player:last-child { border-bottom: none; }
+.rc-pos { font-family: 'Rye', serif; font-size: 0.38rem; width: 28px; flex-shrink: 0; }
+.rc-pos.QB { color: #e05252; } .rc-pos.RB { color: #5cb85c; }
+.rc-pos.WR { color: #5bc0de; } .rc-pos.TE { color: #e8734b; }
+.rc-pname { font-family: 'Crimson Text', serif; font-size: 0.88rem; color: var(--parchment); flex: 1; }
+.rc-pname.empty { color: var(--brown-light); font-style: italic; }
+.rc-team { font-family: 'Rye', serif; font-size: 0.38rem; color: var(--brown-light); }
+
+/* ── Standings tab ── */
+.standings-section { margin-bottom: 28px; }
+.section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.section-head h2 { font-family: 'Rye', serif; font-size: 0.85rem; color: var(--brown-dark); white-space: nowrap; }
+.section-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--gold), transparent); }
+.standings-table { width: 100%; border-collapse: collapse; background: var(--brown-dark); border: 1px solid var(--brown-mid); border-radius: 2px; overflow: hidden; }
+.standings-table th { font-family: 'Rye', serif; font-size: 0.46rem; letter-spacing: 0.12em; color: var(--gold); padding: 9px 14px; text-align: left; border-bottom: 2px solid var(--brown-mid); white-space: nowrap; }
+.standings-table th.r { text-align: right; }
+.standings-table td { padding: 0; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+.standings-team-block { padding: 10px 14px; }
+.standings-rank { font-family: 'Rye', serif; font-size: 1rem; color: var(--gold); text-align: right; padding: 10px 14px; }
+.standings-team-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--cream); }
+.standings-pts { font-family: 'Rye', serif; font-size: 1.1rem; color: var(--gold-light); text-align: right; padding: 10px 14px; }
+.standings-roster-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.player-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.25); border: 1px solid var(--brown-mid); border-radius: 2px; padding: 4px 8px; cursor: pointer; transition: border-color 0.15s; }
+.player-chip:hover { border-color: var(--gold); }
+.player-chip .chip-pos { font-family: 'Rye', serif; font-size: 0.36rem; }
+.player-chip .chip-name { font-family: 'Crimson Text', serif; font-size: 0.85rem; color: var(--parchment); }
+.player-chip .chip-pts { font-family: 'Playfair Display', serif; font-size: 0.8rem; color: var(--gold); margin-left: 4px; }
+.game-status-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.week-chip { display: flex; align-items: center; gap: 6px; background: var(--brown-dark); border: 1px solid var(--brown-mid); border-radius: 2px; padding: 6px 12px; font-family: 'Crimson Text', serif; font-size: 0.85rem; color: var(--parchment); }
+.week-chip.done { border-color: var(--green-light); }
+.week-chip .wc-label { font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.1em; color: var(--gold); margin-right: 4px; }
+.week-chip .wc-score { font-family: 'Rye', serif; font-size: 0.55rem; color: var(--gold-light); }
+
+/* ── Player Detail Popup ── */
+.popup-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.popup-inner { background: var(--brown-dark); border: 2px solid var(--gold); border-radius: 2px; padding: 24px 28px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.popup-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; color: var(--cream); margin-bottom: 4px; }
+.popup-sub { font-family: 'Crimson Text', serif; font-size: 0.9rem; color: var(--brown-light); margin-bottom: 16px; }
+.popup-total { font-family: 'Rye', serif; font-size: 1rem; color: var(--gold-light); margin-bottom: 18px; }
+.stats-table { width: 100%; border-collapse: collapse; }
+.stats-table th { font-family: 'Rye', serif; font-size: 0.42rem; letter-spacing: 0.1em; color: var(--gold); padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--brown-mid); white-space: nowrap; }
+.stats-table th:first-child { text-align: left; }
+.stats-table td { padding: 8px 10px; border-bottom: 1px dashed rgba(255,255,255,0.06); font-family: 'Crimson Text', serif; font-size: 0.9rem; color: var(--parchment); text-align: right; }
+.stats-table td:first-child { text-align: left; color: var(--cream); }
+.stats-table tr.total-row td { border-top: 1px solid var(--brown-mid); border-bottom: none; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--gold-light); }
+.stats-table td.minus { color: #e05252; }
+.no-games { font-family: 'Crimson Text', serif; font-style: italic; font-size: 0.9rem; color: var(--brown-light); padding: 12px 0; }
+
+/* ── Setup / claim screens ── */
+.setup-wrap { max-width: 500px; margin: 0 auto; }
+.setup-card { background: var(--brown-dark); border: 2px solid var(--brown-mid); border-radius: 2px; padding: 22px 26px; margin-bottom: 16px; box-shadow: 4px 4px 0 var(--brown-mid); }
+.lbl { font-family: 'Rye', serif; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 7px; }
+.inp { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid var(--brown-mid); color: var(--cream); font-family: 'Crimson Text', serif; font-size: 1rem; padding: 9px 12px; border-radius: 2px; outline: none; transition: border-color 0.2s; }
+.inp:focus { border-color: var(--gold); }
+.inp::placeholder { color: rgba(255,255,255,0.25); font-style: italic; }
+.row { display: flex; gap: 8px; }
+.status { font-family: 'Crimson Text', serif; font-size: 0.88rem; font-style: italic; color: var(--brown-light); margin-top: 8px; min-height: 18px; }
+.status.ok  { color: #5cb85c; }
+.status.err { color: #e05252; }
+
+/* ── Loading / Error ── */
+.loading-state { text-align: center; padding: 50px 20px; font-family: 'Rye', serif; font-size: 0.65rem; letter-spacing: 0.3em; color: var(--brown-light); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.spinner { width: 26px; height: 26px; border: 3px solid var(--brown-mid); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.err-state { background: var(--red); border: 1px solid #a02020; color: var(--cream); font-family: 'Crimson Text', serif; font-style: italic; font-size: 0.9rem; padding: 10px 14px; border-radius: 2px; }
+
+/* ── Codes overlay ── */
+.codes-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; }
+.codes-overlay-inner { background: var(--brown-dark); border: 2px solid var(--gold); border-radius: 2px; padding: 22px 28px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.codes-table { width: 100%; border-collapse: collapse; }
+.codes-table th { font-family: 'Rye', serif; font-size: 0.46rem; letter-spacing: 0.1em; color: var(--gold); padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--brown-mid); }
+.codes-table td { padding: 10px 12px; border-bottom: 1px dashed rgba(255,255,255,0.07); font-family: 'Crimson Text', serif; font-size: 0.95rem; color: var(--parchment); }
+.codes-table td.code { font-family: 'Rye', serif; font-size: 0.95rem; letter-spacing: 0.25em; color: var(--gold-light); }
+.divider { border: none; border-top: 1px solid var(--brown-mid); margin: 14px 0; }
+.copy-btn { background: none; border: 1px solid var(--brown-mid); color: var(--brown-light); font-family: 'Rye', serif; font-size: 0.4rem; letter-spacing: 0.1em; padding: 3px 8px; cursor: pointer; border-radius: 2px; margin-left: 6px; }
+.copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+@media(max-width:600px) {
+  .banner-inner, .main { padding-left: 12px; padding-right: 12px; }
+  .pool-wrap { max-height: none; }
+  .standings-table th, .standings-table td { padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<header class="banner">
+  <div class="banner-inner">
+    <div class="banner-left">
+      <a href="/index.html" class="banner-back">← Playoff Fantasy</a>
+      <h1 id="banner-title">Playoff <span>Fantasy</span></h1>
+      <div class="banner-sub" id="banner-sub">Draft · Score · Win</div>
+    </div>
+  </div>
+</header>
+
+<main class="main" id="app">
+  <div class="loading-state"><div class="spinner"></div>Loading room…</div>
+</main>
+
+</div>
+<script>
+'use strict';
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function $(id) { return document.getElementById(id); }
+function setApp(html) { document.getElementById('app').innerHTML = html; }
+function loading(msg='Loading…') { return `<div class="loading-state"><div class="spinner"></div>${esc(msg)}</div>`; }
+function errHtml(e) { return `<div class="err-state">Error: ${esc(e?.message || String(e))}</div>`; }
+function fmt(n) { return typeof n === 'number' ? n.toFixed(1) : '—'; }
+function fmtInt(n) { return typeof n === 'number' ? Math.round(n).toString() : '—'; }
+
+const POS_COLORS = { QB:'#e05252', RB:'#5cb85c', WR:'#5bc0de', TE:'#e8734b' };
+function posTag(pos) {
+  const p = String(pos || '').toUpperCase();
+  return `<span class="pos-tag pos-${p}" style="color:${POS_COLORS[p]||'#aaa'}">${esc(p)}</span>`;
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const API = '/api/playoff';
+const ROOM_ID = new URLSearchParams(location.search).get('room');
+const POS_LIMITS = { QB: 2, RB: 3, WR: 3, TE: 2 };
+const ROSTER_ORDER = ['QB','QB','RB','RB','RB','WR','WR','WR','TE','TE'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+const D = {
+  room: null,
+  sessionToken: null,
+  slotIndex: -1,
+  commissionerCode: null,
+  ws: null,
+  tab: 'draft',       // 'draft' | 'standings'
+  rightTab: 'board',  // 'board' | 'rosters'
+  posFilter: 'ALL',
+  sortBy: 'fpg',      // 'fpg' | 'pos' | 'team' | 'name'
+  search: '',
+  showDrafted: false,
+  schedule: null,
+  boxscores: {},      // eventId -> playerStats map
+  // Computed each standings render; used by showPlayerDetail
+  playerPts: {},
+  playerGames: {},
+};
+
+// ── Entry ─────────────────────────────────────────────────────────────────────
+
+if (!ROOM_ID) {
+  setApp('<div class="err-state">No room ID in URL. <a href="/index.html" style="color:var(--gold-light)">← Go back</a></div>');
+} else {
+  initRoom();
+}
+
+async function initRoom() {
+  // Restore stored session
+  D.commissionerCode = localStorage.getItem(`pfantasy_${ROOM_ID}_commissioner`);
+  D.sessionToken     = localStorage.getItem(`pfantasy_${ROOM_ID}_token`);
+  D.slotIndex        = parseInt(localStorage.getItem(`pfantasy_${ROOM_ID}_slot`) ?? '-1', 10);
+
+  try {
+    const r = await fetch(`${API}/rooms/${ROOM_ID}`);
+    if (!r.ok) throw new Error(`Room not found (${r.status})`);
+    D.room = await r.json();
+  } catch (e) {
+    setApp(errHtml(e)); return;
+  }
+
+  $('banner-title').innerHTML = `${esc(D.room.name)} <span style="color:var(--gold-light)">·</span> <span style="font-size:0.7em;color:var(--gold-light)">${D.room.season}</span>`;
+  $('banner-sub').textContent = `${D.room.numTeams}-team playoff fantasy draft`;
+
+  const isSpectator = localStorage.getItem(`pfantasy_${ROOM_ID}_spectator`) === '1';
+  const hasIdentity = D.sessionToken || D.commissionerCode || isSpectator;
+
+  if (!hasIdentity && D.room.status === 'active') {
+    renderClaimForm(); return;
+  }
+
+  // If draft complete and no identity, go straight to standings
+  if (!hasIdentity && D.room.status === 'complete') {
+    D.tab = 'standings';
+    localStorage.setItem(`pfantasy_${ROOM_ID}_spectator`, '1');
+  }
+
+  connectWs();
+  renderAll();
+}
+
+// ── Claim ─────────────────────────────────────────────────────────────────────
+
+function renderClaimForm() {
+  setApp(`
+    <div class="setup-wrap">
+      <div class="setup-card">
+        <div style="font-family:'Rye',serif;font-size:0.9rem;color:var(--gold-light);margin-bottom:8px">${esc(D.room?.name || 'Playoff Fantasy Draft')}</div>
+        <div style="font-family:'Crimson Text',serif;font-style:italic;font-size:0.95rem;color:var(--parchment);margin-bottom:18px">Enter the claim code your commissioner gave you.</div>
+        <label class="lbl">Your Team Code</label>
+        <div class="row" style="margin-bottom:8px">
+          <input class="inp" id="claim-inp" placeholder="6-character code…" maxlength="8"
+            style="text-transform:uppercase;letter-spacing:0.25em;font-family:'Rye',serif"
+            onkeydown="if(event.key==='Enter')doClaim()" />
+          <button class="btn" onclick="doClaim()">Join</button>
+        </div>
+        <div class="status" id="claim-st"></div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-ghost" onclick="viewSpectator()">View as spectator</button>
+      </div>
+    </div>`);
+  setTimeout(() => $('claim-inp')?.focus(), 50);
+}
+
+async function doClaim() {
+  const code = $('claim-inp')?.value?.trim()?.toUpperCase();
+  if (!code) return;
+  const st = $('claim-st');
+  st.className = 'status'; st.textContent = 'Verifying…';
+  try {
+    const r = await fetch(`${API}/rooms/${ROOM_ID}/claim`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ claimCode: code }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const res = await r.json();
+    D.sessionToken = res.sessionToken;
+    D.slotIndex    = res.slotIndex;
+    localStorage.setItem(`pfantasy_${ROOM_ID}_token`, res.sessionToken);
+    localStorage.setItem(`pfantasy_${ROOM_ID}_slot`,  String(res.slotIndex));
+    connectWs();
+    renderAll();
+  } catch {
+    st.className = 'status err'; st.textContent = 'Invalid code — check with your commissioner.';
+  }
+}
+
+function viewSpectator() {
+  localStorage.setItem(`pfantasy_${ROOM_ID}_spectator`, '1');
+  if (D.room.status === 'complete') D.tab = 'standings';
+  connectWs();
+  renderAll();
+}
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+
+function connectWs() {
+  if (D.ws && D.ws.readyState <= 1) return;
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  D.ws = new WebSocket(`${proto}//${location.host}${API}/rooms/${ROOM_ID}/ws`);
+  D.ws.onmessage = evt => {
+    try {
+      const msg = JSON.parse(evt.data);
+      if (msg.type === 'state') { D.room = msg.room; renderAll(); }
+      if (msg.type === 'error') showPickError(msg.message);
+    } catch {}
+  };
+  D.ws.onclose = () => setTimeout(connectWs, 3000);
+}
+
+function showPickError(msg) {
+  const el = $('pick-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
+}
+
+// ── Main Render ───────────────────────────────────────────────────────────────
+
+function renderAll() {
+  const room = D.room;
+  if (!room) { setApp(loading()); return; }
+
+  const n = room.numTeams;
+  const totalPicks = n * 10;
+  const onClockSlot = room.status === 'active' ? snakeSlot(room.currentOverallPick, n, room.draftOrder) : -1;
+  const myTurn = D.slotIndex >= 0 && D.slotIndex === onClockSlot;
+  const onClockTeam = room.teamSlots[onClockSlot];
+  const mySlot = D.slotIndex >= 0 ? room.teamSlots[D.slotIndex] : null;
+
+  // Header
+  let statusLine = '', clockLine = '';
+  if (room.status === 'complete') {
+    statusLine = '<span class="badge badge-green">Draft Complete</span>';
+    clockLine  = 'All picks have been made — see Standings for scores.';
+  } else {
+    const pick0    = room.currentOverallPick - 1;
+    const curRound = Math.floor(pick0 / n) + 1;
+    const curPos   = (pick0 % n) + 1;
+    statusLine = `<span class="room-status">Round ${curRound} · Pick ${curPos} of ${n}</span>`;
+    clockLine  = myTurn ? `Your pick — choose now!` : `On the Clock: ${onClockTeam?.name || '…'}`;
+  }
+
+  const myLabel = mySlot
+    ? `<span style="font-family:'Crimson Text',serif;font-size:0.85rem;color:var(--brown-light);font-style:italic;"> (${esc(mySlot.name)})</span>`
+    : D.commissionerCode ? `<span style="font-family:'Crimson Text',serif;font-size:0.85rem;color:var(--brown-light);font-style:italic;"> (Commissioner)</span>` : '';
+
+  const haspicks = room.picks.length > 0;
+  const commBtn = D.commissionerCode ? `
+    <button class="btn btn-ghost" onclick="showCodesOverlay()">Codes</button>
+    ${haspicks ? `<button class="btn btn-ghost" onclick="undoLastPick()">Undo Pick</button>` : ''}
+    <button class="btn btn-danger" onclick="deleteRoom()">Delete</button>` : '';
+
+  const header = `<div class="room-header">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${statusLine}${myLabel}</div>
+      <div class="room-clock ${myTurn ? 'my-turn' : ''}">${esc(clockLine)}</div>
+      <div class="room-progress">${room.picks.length} / ${totalPicks} picks made</div>
+    </div>
+    <div class="room-actions">${commBtn}</div>
+  </div>`;
+
+  const tabs = `<div class="top-tabs">
+    <button class="top-tab ${D.tab==='draft'?'active':''}" onclick="setTab('draft')">Draft</button>
+    <button class="top-tab ${D.tab==='standings'?'active':''}" onclick="setTab('standings')">Standings</button>
+  </div>`;
+
+  let content = '';
+  if (D.tab === 'draft') {
+    content = renderDraftTab(room, myTurn, onClockSlot, mySlot);
+  } else {
+    content = renderStandingsTab(room);
+  }
+
+  setApp(`
+    ${header}
+    ${tabs}
+    <div id="pick-error" style="display:none;background:var(--red);color:var(--cream);font-family:'Crimson Text',serif;padding:8px 14px;border-radius:2px;margin-bottom:12px;"></div>
+    ${content}
+  `);
+}
+
+function setTab(t) { D.tab = t; renderAll(); }
+function setRightTab(t) { D.rightTab = t; renderAll(); }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DRAFT TAB
+// ═════════════════════════════════════════════════════════════════════════════
+
+function renderDraftTab(room, myTurn, onClockSlot, mySlot) {
+  const myConstraints = getMyConstraints(room);
+  const left  = renderPlayerPool(room, myTurn, mySlot, myConstraints);
+  const right = renderRightPanel(room, mySlot);
+  return `<div class="two-col">${left}${right}</div>`;
+}
+
+function getMyConstraints(room) {
+  if (D.slotIndex < 0) return null;
+  const myPicks = room.assets.filter(a => a.pickedBy === D.slotIndex);
+  const posCounts = { QB: 0, RB: 0, WR: 0, TE: 0 };
+  const usedTeams = new Set();
+  for (const p of myPicks) {
+    if (posCounts[p.position] !== undefined) posCounts[p.position]++;
+    if (p.nflTeam) usedTeams.add(p.nflTeam);
+  }
+  return { posCounts, usedTeams };
+}
+
+function renderPlayerPool(room, myTurn, mySlot, myConstraints) {
+  const positions = ['ALL','QB','RB','WR','TE'];
+  const pills = positions.map(p =>
+    `<button class="pos-pill${D.posFilter===p?' active':''}" onclick="setFilter('${p}')">${p}</button>`
+  ).join('');
+
+  const sortOpts = [
+    ['fpg','FPts/G'], ['pos','Position'], ['team','Team'], ['name','Name'],
+  ].map(([v,l]) => `<option value="${v}" ${D.sortBy===v?'selected':''}>${l}</option>`).join('');
+
+  // Constraints bar (my roster slots)
+  let conBar = '';
+  if (myConstraints) {
+    const pills2 = Object.entries(POS_LIMITS).map(([pos, limit]) => {
+      const count = myConstraints.posCounts[pos] || 0;
+      const full = count >= limit;
+      return `<div class="con-pill${full?' full':''}">
+        <span class="pos-label">${pos}</span>${count}/${limit}
+      </div>`;
+    });
+    const usedTeamsList = [...myConstraints.usedTeams].join(' · ') || 'none';
+    conBar = `<div class="constraints">${pills2.join('')}
+      <div class="con-pill" title="NFL teams on your roster" style="font-family:'Crimson Text',serif;font-size:0.75rem;letter-spacing:0;color:var(--brown-light)">Teams: ${esc(usedTeamsList)}</div>
+    </div>`;
+  }
+
+  const filterBar = `<div class="filter-bar">
+    ${pills}
+    <input class="pool-search" id="pool-search" placeholder="Search…" value="${esc(D.search)}"
+      oninput="D.search=this.value;renderAll()" />
+    <select class="sort-select" onchange="D.sortBy=this.value;renderAll()">${sortOpts}</select>
+  </div>
+  <div class="filter-bar" style="margin-bottom:8px">
+    <label class="show-drafted">
+      <input type="checkbox" ${D.showDrafted?'checked':''} onchange="D.showDrafted=this.checked;renderAll()"/>
+      Show Drafted
+    </label>
+  </div>`;
+
+  let assets = [...room.assets];
+
+  // Filter
+  if (D.posFilter !== 'ALL') assets = assets.filter(a => a.position === D.posFilter);
+  if (D.search.trim()) {
+    const q = D.search.trim().toLowerCase();
+    assets = assets.filter(a =>
+      a.name.toLowerCase().includes(q) ||
+      (a.nflTeam || '').toLowerCase().includes(q)
+    );
+  }
+  if (!D.showDrafted) assets = assets.filter(a => a.pickedBy === null);
+
+  // Sort
+  const sortFn = {
+    fpg:  (a, b) => (b.gp > 0 ? b.seasonPts/b.gp : 0) - (a.gp > 0 ? a.seasonPts/a.gp : 0),
+    pos:  (a, b) => ['QB','RB','WR','TE'].indexOf(a.position) - ['QB','RB','WR','TE'].indexOf(b.position),
+    team: (a, b) => (a.nflTeam||'').localeCompare(b.nflTeam||''),
+    name: (a, b) => a.name.localeCompare(b.name),
+  }[D.sortBy] || (() => 0);
+  assets.sort(sortFn);
+
+  const rows = assets.map(a => {
+    const drafted   = a.pickedBy !== null;
+    const drafter   = drafted ? room.teamSlots[a.pickedBy]?.name : null;
+    const fpg       = a.gp > 0 ? (a.seasonPts / a.gp).toFixed(1) : '—';
+
+    // Eligibility for MY team
+    let ineligible = false;
+    let ineligReason = '';
+    if (myConstraints && !drafted) {
+      if ((myConstraints.posCounts[a.position] || 0) >= (POS_LIMITS[a.position] || 99)) {
+        ineligible = true; ineligReason = `${a.position} roster full`;
+      } else if (a.nflTeam && myConstraints.usedTeams.has(a.nflTeam)) {
+        ineligible = true; ineligReason = `Already have ${a.nflTeam} player`;
+      }
+    }
+
+    const canPick = myTurn && !drafted && !ineligible;
+    const rowCls  = drafted ? 'pool-row drafted' : ineligible ? 'pool-row ineligible' : 'pool-row';
+
+    return `<tr class="${rowCls}" title="${esc(ineligReason)}">
+      <td><span class="p-name">${esc(a.name)}</span></td>
+      <td>${posTag(a.position)}<span class="nfl-team">${esc(a.nflTeam)}</span></td>
+      <td class="r">${esc(fpg)}</td>
+      <td class="r">${drafted
+        ? `<span class="drafted-by">${esc(drafter || '?')}</span>`
+        : `<button class="pick-btn" ${canPick?'':' disabled'} onclick="makePick('${esc(a.id)}')">${ineligible ? '—' : 'Pick'}</button>`
+      }</td>
+    </tr>`;
+  }).join('');
+
+  const table = assets.length
+    ? `<table class="pool-table"><thead><tr>
+        <th>Player</th><th>Team</th>
+        <th class="r">FPts/G</th><th class="r"></th>
+      </tr></thead><tbody>${rows}</tbody></table>`
+    : `<div style="padding:24px;text-align:center;font-family:'Crimson Text',serif;font-style:italic;color:var(--brown-light)">No players match this filter.</div>`;
+
+  return `<div class="panel-left">
+    ${conBar}
+    ${filterBar}
+    <div class="pool-wrap">${table}</div>
+  </div>`;
+}
+
+function setFilter(pos) { D.posFilter = pos; renderAll(); }
+
+// ── Right Panel ───────────────────────────────────────────────────────────────
+
+function renderRightPanel(room, mySlot) {
+  const tabs = `<div class="panel-tabs">
+    <button class="panel-tab ${D.rightTab==='board'?'active':''}" onclick="setRightTab('board')">Draft Board</button>
+    <button class="panel-tab ${D.rightTab==='rosters'?'active':''}" onclick="setRightTab('rosters')">Rosters</button>
+  </div>`;
+  const content = D.rightTab === 'board'
+    ? renderDraftGrid(room, mySlot)
+    : renderRosters(room, mySlot);
+  return `<div class="panel-right">${tabs}${content}</div>`;
+}
+
+function renderDraftGrid(room, mySlot) {
+  const n = room.numTeams;
+  const totalRounds = 10;
+  const colSlots = room.draftOrder.map(idx => room.teamSlots[idx]);
+  const pickMap  = {};
+  for (const p of room.picks) pickMap[p.overallPick] = p;
+  const assetMap = {};
+  for (const a of room.assets) assetMap[a.id] = a;
+
+  const templateCols = `40px repeat(${n}, minmax(70px, 1fr))`;
+  const headerCells  = colSlots.map((slot, c) => {
+    const isMe = mySlot && slot?.index === mySlot.index;
+    return `<div class="grid-th${isMe?' my-col':''}${c%2===1?' alt-col':''}">${esc(slot?.name||'?')}</div>`;
+  }).join('');
+
+  let html = `<div class="draft-grid-table" style="grid-template-columns:${templateCols}">`;
+  html += `<div></div>${headerCells}`;
+
+  for (let r = 1; r <= totalRounds; r++) {
+    html += `<div class="grid-round-lbl">${r}</div>`;
+    for (let c = 0; c < n; c++) {
+      const posInRound  = r % 2 === 1 ? c : (n - 1 - c);
+      const overallPick = (r - 1) * n + posInRound + 1;
+      const slotIndex   = room.draftOrder[c];
+      const isMe        = mySlot && slotIndex === mySlot.index;
+      const isCurrent   = room.status === 'active' && overallPick === room.currentOverallPick;
+      const pick        = pickMap[overallPick];
+
+      let cellClass = `grid-cell${isMe?' my-col':''}${c%2===1?' alt-col':''}`;
+      let cellContent = '';
+
+      if (pick) {
+        const asset = assetMap[pick.assetId];
+        cellClass += ' filled';
+        cellContent = `<span class="grid-pos">${esc(asset?.position||'')}</span>${esc(asset?.name||'?')}`;
+      } else if (isCurrent) {
+        cellClass += ' on-clock';
+        cellContent = '⏱ On Clock';
+      } else if (overallPick > n * totalRounds) {
+        // shouldn't happen for fixed 10-round draft
+      } else {
+        cellClass += ' future';
+      }
+      html += `<div class="${cellClass}">${cellContent}</div>`;
+    }
+  }
+  html += '</div>';
+  return `<div class="draft-grid-scroll">${html}</div>`;
+}
+
+function renderRosters(room, mySlot) {
+  const cols = Math.min(3, Math.max(1, room.numTeams));
+  const cards = room.teamSlots.map(slot => {
+    const teamPicks = room.assets.filter(a => a.pickedBy === slot.index);
+    const byPos     = { QB:[], RB:[], WR:[], TE:[] };
+    for (const p of teamPicks) if (byPos[p.position]) byPos[p.position].push(p);
+
+    const isMe = mySlot && slot.index === mySlot.index;
+    const rows = ROSTER_ORDER.map((pos, i) => {
+      const player = byPos[pos]?.shift();
+      return `<div class="rc-player">
+        <span class="rc-pos ${pos}">${pos}</span>
+        ${player
+          ? `<span class="rc-pname">${esc(player.name)}</span><span class="rc-team">${esc(player.nflTeam)}</span>`
+          : `<span class="rc-pname empty">(empty)</span>`
+        }
+      </div>`;
+    }).join('');
+
+    const badge = isMe ? ' <span class="badge badge-green">You</span>' : '';
+    return `<div class="roster-card">
+      <div class="rc-head">
+        <div class="rc-name">${esc(slot.name)}${badge}</div>
+        <div class="rc-count">${teamPicks.length}/10</div>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  return `<div class="rosters-wrap" style="grid-template-columns:repeat(${cols},1fr)">${cards}</div>`;
+}
+
+// ── Pick ──────────────────────────────────────────────────────────────────────
+
+function makePick(assetId) {
+  if (!D.ws || D.ws.readyState !== WebSocket.OPEN) {
+    alert('Not connected. Please wait a moment and try again.'); return;
+  }
+  D.ws.send(JSON.stringify({ type: 'pick', assetId, sessionToken: D.sessionToken }));
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// STANDINGS TAB
+// ═════════════════════════════════════════════════════════════════════════════
+
+function renderStandingsTab(room) {
+  if (!D.schedule) {
+    loadSchedule(room.season);
+    return loading('Loading playoff schedule…');
+  }
+
+  // Compute scores from boxscores — write to D so showPlayerDetail can access them
+  D.playerPts   = {};
+  D.playerGames = {};
+  const completedGames = D.schedule.filter(g => g.completed);
+
+  for (const game of completedGames) {
+    const boxscore = D.boxscores[game.id];
+    if (!boxscore) continue;
+    for (const asset of room.assets) {
+      if (asset.pickedBy === null) continue;
+      const stats = boxscore[asset.name];
+      if (!stats) continue;
+      const fpts = computeFpts(stats, asset.position);
+      if (!D.playerPts[asset.id]) D.playerPts[asset.id] = 0;
+      D.playerPts[asset.id] += fpts;
+      if (!D.playerGames[asset.id]) D.playerGames[asset.id] = [];
+      const opp = asset.nflTeam === game.homeTeam ? game.awayTeam : game.homeTeam;
+      D.playerGames[asset.id].push({ weekName: game.weekName, opponent: opp, stats, fpts });
+    }
+  }
+  const { playerPts, playerGames } = D;
+
+  // Team totals
+  const teamTotals = room.teamSlots.map(slot => {
+    const picks = room.assets.filter(a => a.pickedBy === slot.index);
+    const pts   = picks.reduce((sum, a) => sum + (playerPts[a.id] || 0), 0);
+    return { slot, picks, pts };
+  }).sort((a, b) => b.pts - a.pts);
+
+  // Games status bar
+  const weekGroups = {};
+  for (const g of D.schedule) {
+    if (!weekGroups[g.weekName]) weekGroups[g.weekName] = [];
+    weekGroups[g.weekName].push(g);
+  }
+  const gameBar = Object.entries(weekGroups).map(([name, games]) => {
+    const done = games.every(g => g.completed);
+    const scores = games.map(g =>
+      g.completed ? `${g.awayTeam} ${g.awayScore}–${g.homeScore} ${g.homeTeam}` : `${g.awayTeam} @ ${g.homeTeam}`
+    ).join(', ');
+    return `<div class="week-chip ${done?'done':''}">
+      <span class="wc-label">${esc(name)}</span>
+      <span style="color:var(--parchment);font-size:0.82rem">${esc(scores)}</span>
+    </div>`;
+  }).join('');
+
+  // Pending boxscores
+  const pending = completedGames.filter(g => !D.boxscores[g.id]);
+  if (pending.length) {
+    for (const g of pending) loadBoxscore(g.id);
+    // Render what we have and update when they load
+  }
+
+  const rows = teamTotals.map((t, rank) => {
+    const chips = t.picks.map(a => {
+      const pts  = playerPts[a.id] || 0;
+      const info = playerGames[a.id]?.length ? `${fmt(pts)} pts` : '0 pts';
+      return `<span class="player-chip" onclick="showPlayerDetail('${esc(a.id)}')" title="Click for game log">
+        <span class="chip-pos" style="color:${POS_COLORS[a.position]||'#aaa'}">${esc(a.position)}</span>
+        <span class="chip-name">${esc(a.name)}</span>
+        <span class="chip-pts">${esc(info)}</span>
+      </span>`;
+    }).join('');
+
+    return `<tr>
+      <td><div class="standings-rank">${rank+1}</div></td>
+      <td><div class="standings-team-block">
+        <div class="standings-team-name">${esc(t.slot.name)}</div>
+        <div class="standings-roster-row">${chips || '<span style="color:var(--brown-light);font-family:\'Crimson Text\',serif;font-style:italic;font-size:0.85rem">No players drafted yet</span>'}</div>
+      </div></td>
+      <td><div class="standings-pts">${fmt(t.pts)}</div></td>
+    </tr>`;
+  }).join('');
+
+  const note = completedGames.length === 0
+    ? '<div style="font-family:\'Crimson Text\',serif;font-style:italic;color:var(--brown-light);margin-bottom:16px">Scores will appear here once playoff games have been played.</div>'
+    : '';
+
+  return `
+    <div class="standings-section">
+      <div class="section-head"><h2>Playoff Schedule</h2><div class="section-line"></div></div>
+      <div class="game-status-bar">${gameBar || '<span style="color:var(--brown-light);font-style:italic;font-family:\'Crimson Text\',serif">No games found yet for this season.</span>'}</div>
+    </div>
+    <div class="standings-section">
+      <div class="section-head"><h2>Standings</h2><div class="section-line"></div></div>
+      ${note}
+      <table class="standings-table">
+        <thead><tr>
+          <th style="width:48px">Rank</th>
+          <th>Team</th>
+          <th class="r" style="width:100px">Total Pts</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── Player Detail Popup ───────────────────────────────────────────────────────
+
+function showPlayerDetail(assetId) {
+  const room = D.room;
+  if (!room) return;
+  const asset    = room.assets.find(a => a.id === assetId);
+  if (!asset) return;
+  const games    = D.playerGames[assetId] || [];
+  const totalPts = games.reduce((s, g) => s + g.fpts, 0);
+
+  const isQB = asset.position === 'QB';
+
+  const headers = isQB
+    ? ['Round','Opp','Pass Yds','Pass TD','INT','Rush Yds','Rush TD','Fum Lost','FPts']
+    : ['Round','Opp','Rec','Rec Yds','Rec TD','Rush Yds','Rush TD','Fum Lost','FPts'];
+
+  const statRows = games.length > 0
+    ? games.map(g => {
+        const pass = g.stats.passing   || {};
+        const rush = g.stats.rushing   || {};
+        const rec  = g.stats.receiving || {};
+        const fum  = g.stats.fumbles   || {};
+        const fl   = parseFloat(fum.fumblesLost || 0);
+
+        const cells = isQB ? [
+          fmtInt(parseFloat(pass.passingYards      || 0)),
+          fmtInt(parseFloat(pass.passingTouchdowns || 0)),
+          fmtInt(parseFloat(pass.interceptions     || 0)),
+          fmtInt(parseFloat(rush.rushingYards      || 0)),
+          fmtInt(parseFloat(rush.rushingTouchdowns || 0)),
+          fl ? `<span class="minus">−${fl}</span>` : '0',
+          `<strong>${fmt(g.fpts)}</strong>`,
+        ] : [
+          fmtInt(parseFloat(rec.receptions         || 0)),
+          fmtInt(parseFloat(rec.receivingYards      || 0)),
+          fmtInt(parseFloat(rec.receivingTouchdowns || 0)),
+          fmtInt(parseFloat(rush.rushingYards       || 0)),
+          fmtInt(parseFloat(rush.rushingTouchdowns  || 0)),
+          fl ? `<span class="minus">−${fl}</span>` : '0',
+          `<strong>${fmt(g.fpts)}</strong>`,
+        ];
+
+        return `<tr>
+          <td>${esc(g.weekName)}</td>
+          <td>vs ${esc(g.opponent)}</td>
+          ${cells.map(c => `<td>${c}</td>`).join('')}
+        </tr>`;
+      }).join('') +
+      `<tr class="total-row">
+        <td colspan="2">Total</td>
+        ${new Array(headers.length - 3).fill('<td>—</td>').join('')}
+        <td></td><td>${fmt(totalPts)}</td>
+      </tr>`
+    : `<tr><td colspan="${headers.length}" class="no-games">No playoff games played yet.</td></tr>`;
+
+  const popup = document.createElement('div');
+  popup.className = 'popup-overlay';
+  popup.innerHTML = `<div class="popup-inner">
+    <div class="popup-title">${esc(asset.name)}</div>
+    <div class="popup-sub">${esc(asset.position)} · ${esc(asset.nflTeam)} · ${esc(room.teamSlots[asset.pickedBy]?.name || '—')}</div>
+    <div class="popup-total">Season avg: ${asset.gp > 0 ? fmt(asset.seasonPts / asset.gp) : '—'} FPts/G &nbsp;&nbsp;|&nbsp;&nbsp; Playoff total: ${fmt(totalPts)} FPts</div>
+    <table class="stats-table">
+      <thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${statRows}</tbody>
+    </table>
+    <div style="margin-top:16px">
+      <button class="btn btn-ghost" onclick="this.closest('.popup-overlay').remove()">Close</button>
+    </div>
+  </div>`;
+  document.body.appendChild(popup);
+  popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
+}
+
+// ── Scoring ───────────────────────────────────────────────────────────────────
+
+function computeFpts(stats, position) {
+  const pass = stats.passing  || {};
+  const rush = stats.rushing  || {};
+  const rec  = stats.receiving || {};
+  const fum  = stats.fumbles   || {};
+
+  const passYds  = parseFloat(pass.passingYards       || 0);
+  const passTds  = parseFloat(pass.passingTouchdowns  || 0);
+  const passInt  = parseFloat(pass.interceptions      || 0);
+  const rushYds  = parseFloat(rush.rushingYards        || 0);
+  const rushTds  = parseFloat(rush.rushingTouchdowns  || 0);
+  const receptions = parseFloat(rec.receptions        || 0);
+  const recYds   = parseFloat(rec.receivingYards      || 0);
+  const recTds   = parseFloat(rec.receivingTouchdowns || 0);
+  const fumsLost = parseFloat(fum.fumblesLost         || 0);
+
+  const recMult = position === 'TE' ? 1.75 : 1.0;
+
+  return (
+    passYds  * 0.05 +
+    passTds  * 6 +
+    passInt  * -2 +
+    rushYds  * 0.1 +
+    rushTds  * 6 +
+    receptions * recMult +
+    recYds   * 0.1 +
+    recTds   * 6 +
+    fumsLost * -2
+  );
+}
+
+// ── Schedule & Boxscore loading ───────────────────────────────────────────────
+
+async function loadSchedule(season) {
+  try {
+    const r = await fetch(`${API}/schedule?season=${season}`);
+    if (!r.ok) throw new Error();
+    D.schedule = await r.json();
+    // Kick off boxscore loads for completed games
+    for (const g of D.schedule.filter(g2 => g2.completed)) {
+      loadBoxscore(g.id);
+    }
+    renderAll();
+  } catch {
+    D.schedule = [];
+    renderAll();
+  }
+}
+
+async function loadBoxscore(eventId) {
+  if (D.boxscores[eventId]) return;
+  try {
+    const r = await fetch(`${API}/boxscore?event=${eventId}`);
+    if (!r.ok) return;
+    D.boxscores[eventId] = await r.json();
+    // Only re-render if we're on standings tab to avoid draft disruption
+    if (D.tab === 'standings') renderAll();
+  } catch {}
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// COMMISSIONER ACTIONS
+// ═════════════════════════════════════════════════════════════════════════════
+
+async function undoLastPick() {
+  const last  = D.room?.picks?.at(-1);
+  const asset = last ? D.room.assets.find(a => a.id === last.assetId) : null;
+  const label = asset?.name || 'the last pick';
+  if (!confirm(`Undo ${label}?`)) return;
+  try {
+    await fetch(`${API}/rooms/${ROOM_ID}/undo`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commissionerCode: D.commissionerCode }),
+    });
+  } catch (e) { alert('Failed to undo: ' + e.message); }
+}
+
+async function deleteRoom() {
+  if (!confirm('Delete this room? This cannot be undone.')) return;
+  try {
+    await fetch(`${API}/rooms/${ROOM_ID}`, {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commissionerCode: D.commissionerCode }),
+    });
+    setApp('<div class="err-state">Room has been deleted.</div>');
+  } catch (e) { alert('Failed to delete: ' + e.message); }
+}
+
+function showCodesOverlay() {
+  let slots;
+  try { slots = JSON.parse(localStorage.getItem(`pfantasy_${ROOM_ID}_slots`) || 'null'); } catch {}
+  if (!slots) {
+    alert('Claim codes are only available in the browser where you created the room.'); return;
+  }
+  const rows = slots.map(s =>
+    `<tr><td>${esc(s.name)}</td><td class="code">${esc(s.claimCode)}</td></tr>`
+  ).join('');
+  const url = `${location.origin}/league.html?room=${ROOM_ID}`;
+  const overlay = document.createElement('div');
+  overlay.className = 'codes-overlay';
+  overlay.innerHTML = `<div class="codes-overlay-inner">
+    <div style="font-family:'Rye',serif;font-size:0.9rem;color:var(--gold-light);margin-bottom:12px">Claim Codes</div>
+    <label style="font-family:'Rye',serif;font-size:0.48rem;letter-spacing:0.12em;color:var(--gold)">Room URL</label>
+    <div style="background:rgba(0,0,0,0.3);border:1px solid var(--brown-mid);padding:8px 12px;border-radius:2px;font-family:'Crimson Text',serif;font-size:0.85rem;color:var(--parchment);word-break:break-all;margin:6px 0 16px">
+      ${esc(url)} <button class="copy-btn" onclick="navigator.clipboard.writeText('${esc(url)}').catch(()=>{})">Copy</button>
+    </div>
+    <label style="font-family:'Rye',serif;font-size:0.48rem;letter-spacing:0.12em;color:var(--gold)">Team Codes</label>
+    <table class="codes-table" style="margin-top:8px">
+      <thead><tr><th>Team</th><th>Claim Code</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="divider"></div>
+    <button class="btn btn-ghost" onclick="this.closest('.codes-overlay').remove()">Close</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+// ── Snake slot helper (mirrors Durable Object logic) ──────────────────────────
+
+function snakeSlot(overallPick, numTeams, draftOrder) {
+  const pick0 = overallPick - 1;
+  const round = Math.floor(pick0 / numTeams);
+  const pos   = pick0 % numTeams;
+  const idx   = round % 2 === 0 ? pos : (numTeams - 1 - pos);
+  return draftOrder[idx];
+}
+</script>
+</body>
+</html>

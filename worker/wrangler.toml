@@ -1,0 +1,36 @@
+# Playoff Fantasy — Worker config
+
+name               = "playoff-fantasy-worker"
+main               = "src/index.js"
+compatibility_date = "2024-09-23"
+workers_dev        = false
+
+# Route: serve API on your subdomain.
+# 1. Create a Cloudflare Pages project connected to playoff-fantasy/pages/
+#    and set the custom domain to playoff.ffhistorian.com.
+# 2. Create this Worker and set route so /api/* hits it:
+routes = [
+  { pattern = "playoff.ffhistorian.com/api/*", zone_name = "ffhistorian.com" }
+]
+
+# ── KV Namespace ──────────────────────────────────────────────────────────────
+# Run: wrangler kv:namespace create PLAYOFF_KV
+#      Paste the returned id below.
+# Run: wrangler kv:namespace create PLAYOFF_KV --preview
+#      Paste the returned preview_id below.
+[[kv_namespaces]]
+binding    = "PLAYOFF_KV"
+id         = "REPLACE_WITH_YOUR_KV_ID"
+preview_id = "REPLACE_WITH_YOUR_KV_PREVIEW_ID"
+
+# ── Durable Objects ───────────────────────────────────────────────────────────
+[[durable_objects.bindings]]
+name       = "PLAYOFF_ROOM"
+class_name = "PlayoffRoom"
+
+[[migrations]]
+tag              = "v1"
+new_sqlite_classes = ["PlayoffRoom"]
+
+[observability]
+enabled = true
