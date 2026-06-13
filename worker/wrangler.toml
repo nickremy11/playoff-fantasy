@@ -16,12 +16,9 @@ routes = [
 # ── KV Namespace ──────────────────────────────────────────────────────────────
 # Run: wrangler kv:namespace create PLAYOFF_KV
 #      Paste the returned id below.
-# Run: wrangler kv:namespace create PLAYOFF_KV --preview
-#      Paste the returned preview_id below.
 [[kv_namespaces]]
 binding    = "PLAYOFF_KV"
-id         = "REPLACE_WITH_YOUR_KV_ID"
-preview_id = "REPLACE_WITH_YOUR_KV_PREVIEW_ID"
+id         = "9b6123ebb4904b338dc17bc74f7b67c3"
 
 # ── Durable Objects ───────────────────────────────────────────────────────────
 [[durable_objects.bindings]]
